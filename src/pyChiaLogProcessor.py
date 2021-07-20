@@ -25,7 +25,6 @@ def find_id(lines) -> str:
 def find_phrase_start(lines, phrase: int) -> datetime:
     def to_datetime(line):
         try:
-            print(line)
             timeformat = "%b %d %H:%M:%S %Y"
             return datetime.strptime(line, timeformat)
         except:
