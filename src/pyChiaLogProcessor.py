@@ -32,7 +32,10 @@ def find_phrase_start(lines, phrase: int) -> datetime:
             return None
 
     pattern = "Starting phase 1/4: .* \\w{3} (\\w{3} \\d{2} \\d{2}:\\d{2}:\\d{2} \\d{4})".replace('1', str(phrase))
-    return next(to_datetime(re.search(pattern, line)[1]) for line in lines if re.search(pattern, line) is not None)
+    try:
+        return next(to_datetime(re.search(pattern, line)[1]) for line in lines if re.search(pattern, line) is not None)
+    except StopIteration:
+        return None
 
 
 def find_complete(lines, plot_name: str) -> datetime:
