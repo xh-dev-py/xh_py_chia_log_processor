@@ -38,6 +38,7 @@ def find_phrase_start(lines, phrase: int) -> Optional[datetime]:
     except StopIteration:
         return None
 
+
 def find_phrase_end(lines, phrase: int) -> Optional[datetime]:
     def to_datetime(line):
         try:
@@ -46,7 +47,8 @@ def find_phrase_end(lines, phrase: int) -> Optional[datetime]:
         except:
             return None
 
-    pattern = "Time for phase 1 = \\d+\\.\\d+ seconds\\..* \\w{3} (\\w{3} \\d{2} \\d{2}:\\d{2}:\\d{2} \\d{4})".replace('1', str(phrase))
+    pattern = "Time for phase 1 = \\d+\\.\\d+ seconds\\..* \\w{3} (\\w{3} \\d{2} \\d{2}:\\d{2}:\\d{2} \\d{4})".replace(
+        '1', str(phrase))
     try:
         return next(to_datetime(re.search(pattern, line)[1]) for line in lines if re.search(pattern, line) is not None)
     except StopIteration:
