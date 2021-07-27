@@ -1,10 +1,17 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 
 def __parse_to_datetime(d_str: str) -> datetime:
     return datetime.strptime(d_str[0:19], "%Y-%m-%dT%H:%M:%S")
+
+def formatDuration(dt: Optional[timedelta]) -> str:
+    if dt is None:
+        return ""
+    else:
+        return dt.__str__()
+
 
 
 def find_start(lines) -> Optional[datetime]:
@@ -187,7 +194,7 @@ class ChiaLogSummary:
         else:
             return False
 
-    def _duration(self, tag: str) -> Optional[datetime]:
+    def _duration(self, tag: str) -> Optional[timedelta]:
         tag = self.summary[tag]
         if tag['start'] is not None and tag['end'] is not None:
             return tag['end'] - tag['start']
