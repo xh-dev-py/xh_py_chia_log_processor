@@ -112,7 +112,7 @@ class SummaryContainer:
     name: str
     record: LogSummaryRecord
 
-    def __init__(self, name:str):
+    def __init__(self, name: str):
         self.name = name
         self.record = LogSummaryRecord()
 
@@ -149,7 +149,7 @@ def summary(lines) -> dict:
     if phrase2 is None:
         return res
     else:
-        res['phrase2'].progress = phrase2
+        res['phrase2'].start = phrase2
 
     phrase2_done = find_phrase_end(lines, 2)
     if phrase2_done is None:
@@ -245,6 +245,10 @@ class ChiaLogSummary:
         else:
             return None
 
+    def _progress(self, tag: str) -> float:
+        tag_line = self.summary[tag]
+        return tag_line.progress
+
     def isCompleted(self) -> bool:
         return self._testPhraseDone('whole')
 
@@ -254,8 +258,14 @@ class ChiaLogSummary:
     def isPhrase1Done(self) -> bool:
         return self._testPhraseDone('phrase1')
 
+    def wholeProgress(self) -> float:
+        return self._progress('whole')
+
     def phrase1Duration(self) -> Optional[datetime]:
         return self._duration('phrase1')
+
+    def phrase1Progress(self) -> float:
+        return self._progress('phrase1')
 
     def isPhrase2Done(self) -> bool:
         return self._testPhraseDone('phrase2')
@@ -263,17 +273,26 @@ class ChiaLogSummary:
     def phrase2Duration(self) -> Optional[datetime]:
         return self._duration('phrase2')
 
+    def phrase2Progress(self) -> float:
+        return self._progress('phrase2')
+
     def isPhrase3Done(self) -> bool:
         return self._testPhraseDone('phrase3')
 
     def phrase3Duration(self) -> Optional[datetime]:
         return self._duration('phrase3')
 
+    def phrase3Progress(self) -> float:
+        return self._progress('phrase3')
+
     def isPhrase4Done(self) -> bool:
         return self._testPhraseDone('phrase4')
 
     def phrase4Duration(self) -> Optional[datetime]:
         return self._duration('phrase4')
+
+    def phrase4Progress(self) -> float:
+        return self._progress('phrase4')
 
 
 if __name__ == '__main__':
