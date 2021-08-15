@@ -295,7 +295,7 @@ class ChiaLogSummary:
 
 
 if __name__ == '__main__':
-    log = ChiaLog(r"Y:\plot109.log")
+    log = ChiaLog(r"c:\users\xeth0\plot125.log")
     print(log.find_start())
     print(log.find_id())
     print(log.find_phrase(1))
