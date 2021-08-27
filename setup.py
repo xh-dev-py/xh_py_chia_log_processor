@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='pyChiaLogProcessor',
-    version='0.0.12',
+    version='0.0.13',
     description='Chia plots log porcessor',
     py_modules=['pyChiaLogProcessor'],
     package_dir={'': 'src'},

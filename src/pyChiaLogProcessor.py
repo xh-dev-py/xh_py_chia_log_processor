@@ -3,6 +3,13 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 
+# PROCESS_WHOLE = "whole"
+# PROCESS_PHASE_1 = 'phrase1'
+# PROCESS_PHASE_2 = 'phrase2'
+# PROCESS_PHASE_3 = 'phrase3'
+# PROCESS_PHASE_4 = 'phrase4'
+
+
 def __parse_to_datetime(d_str: str) -> datetime:
     return datetime.strptime(d_str[0:19], "%Y-%m-%dT%H:%M:%S")
 
@@ -106,92 +113,97 @@ class LogSummaryRecord:
         else:
             return None
 
+    def testPhraseDone(self) -> bool:
+        if self.start is not None and self.end is not None:
+            return True
+        else:
+            return False
+
+    def duration(self) -> Optional[timedelta]:
+        if self.start is not None and self.end is not None:
+            return self.end - self.start
+        else:
+            return None
+
 
 class SummaryContainer:
-    name: str
-    record: LogSummaryRecord
+    whole: LogSummaryRecord = LogSummaryRecord()
+    phase1: LogSummaryRecord = LogSummaryRecord()
+    phase2: LogSummaryRecord = LogSummaryRecord()
+    phase3: LogSummaryRecord = LogSummaryRecord()
+    phase4: LogSummaryRecord = LogSummaryRecord()
 
-    def __init__(self, name: str):
-        self.name = name
-        self.record = LogSummaryRecord()
 
-
-def summary(lines) -> dict:
-    res = {
-        'whole': LogSummaryRecord(),
-        'phrase1': LogSummaryRecord(),
-        'phrase2': LogSummaryRecord(),
-        'phrase3': LogSummaryRecord(),
-        'phrase4': LogSummaryRecord(),
-    }
+def summary(lines) -> SummaryContainer:
+    res = SummaryContainer()
     has_start = find_start(lines)
     if has_start is None:
         return res
     else:
-        res['whole'].start = has_start
+        res.whole.start = has_start
 
     phrase1 = find_phrase_start(lines, 1)
     if phrase1 is None:
         return res
     else:
-        res['phrase1'].start = phrase1
+        res.phase1.start = phrase1
 
     phrase1_done = find_phrase_end(lines, 1)
     if phrase1_done is None:
         return res
     else:
-        res['phrase1'].end = phrase1_done
-        res['whole'].progress = round(25, 2)
-        res['phrase1'].progress = round(100, 2)
+        res.phase1.end = phrase1_done
+        res.whole.progress = round(25, 2)
+        res.phase1.progress = round(100, 2)
 
     phrase2 = find_phrase_start(lines, 2)
     if phrase2 is None:
         return res
     else:
-        res['phrase2'].start = phrase2
+        res.phase2.start = phrase2
 
     phrase2_done = find_phrase_end(lines, 2)
     if phrase2_done is None:
         return res
     else:
-        res['phrase2'].end = phrase2_done
-        res['whole'].progress = round(50, 2)
-        res['phrase2'].progress = round(100, 2)
+        res.phase2.end = phrase2_done
+        res.whole.progress = round(50, 2)
+        res.phase2.progress = round(100, 2)
 
     phrase3 = find_phrase_start(lines, 3)
     if phrase3 is None:
         return res
     else:
-        res['phrase3'].start = phrase3
+        res.phase3.start = phrase3
 
     phrase3_done = find_phrase_end(lines, 3)
     if phrase3_done is None:
         return res
     else:
-        res['phrase3'].end = phrase3_done
-        res['whole'].progress = round(75, 2)
-        res['phrase3'].progress = round(100, 2)
+        res.phase3.end = phrase3_done
+        res.whole.progress = round(75, 2)
+        res.phase3.progress = round(100, 2)
 
     phrase4 = find_phrase_start(lines, 4)
     if phrase4 is None:
         return res
     else:
-        res['phrase4'].start = phrase4
+        res.phase4.start = phrase4
 
     phrase4_done = find_phrase_end(lines, 4)
     if phrase4_done is None:
         return res
     else:
-        res['phrase4'].end = phrase4_done
-        res['whole'].progress = round(98, 2)
-        res['phrase4'].progress = round(100, 2)
+        res.phase4.end = phrase4_done
+        res.whole.progress = round(98, 2)
+        res.phase4.progress = round(100, 2)
 
     completed = find_complete(lines, find_plot_name(lines))
     if completed is None:
         return res
     else:
-        res['whole'].end = completed
-        res['whole'].progress = round(100, 2)
+        res.whole.end = completed
+        res.whole.progress = round(100, 2)
 
     return res
 
@@ -221,77 +233,59 @@ class ChiaLog:
         else:
             return find_complete(self.lines, plot_name)
 
-    def summary(self) -> dict:
+    def summary(self) -> SummaryContainer:
         return summary(self.lines)
 
 
 class ChiaLogSummary:
 
     def __init__(self, log):
-        self.summary = log.summary()
-
-    def _testPhraseDone(self, tag: str) -> bool:
-        tag_line = self.summary[tag]
-        if tag_line.start is not None and tag_line.end is not None:
-            return True
-        else:
-            return False
-
-    def _duration(self, tag: str) -> Optional[timedelta]:
-        tag_line = self.summary[tag]
-        if tag_line.start is not None and tag_line.end is not None:
-            return tag_line.end - tag_line.start
-        else:
-            return None
-
-    def _progress(self, tag: str) -> float:
-        tag_line = self.summary[tag]
-        return tag_line.progress
+        self.summary: SummaryContainer = log.summary()
 
     def isCompleted(self) -> bool:
-        return self._testPhraseDone('whole')
+        return self.summary.whole.testPhraseDone()
 
     def completeDuration(self):
-        return self._duration('whole')
+        return self.summary.whole.duration()
 
     def isPhrase1Done(self) -> bool:
-        return self._testPhraseDone('phrase1')
+        return self.summary.phase1.testPhraseDone()
 
     def wholeProgress(self) -> float:
-        return self._progress('whole')
+        return self.summary.whole.progress
 
     def phrase1Duration(self) -> Optional[datetime]:
-        return self._duration('phrase1')
+        return self.summary.phase1.duration()
 
     def phrase1Progress(self) -> float:
-        return self._progress('phrase1')
+        return self.summary.phase1.progress
 
     def isPhrase2Done(self) -> bool:
-        return self._testPhraseDone('phrase2')
+        return self.summary.phase2.testPhraseDone()
 
     def phrase2Duration(self) -> Optional[datetime]:
-        return self._duration('phrase2')
+        return self.summary.phase2.duration()
 
     def phrase2Progress(self) -> float:
-        return self._progress('phrase2')
+        return self.summary.phase2.progress
 
     def isPhrase3Done(self) -> bool:
-        return self._testPhraseDone('phrase3')
+        return self.summary.phase3.testPhraseDone()
 
     def phrase3Duration(self) -> Optional[datetime]:
-        return self._duration('phrase3')
+        return self.summary.phase3.duration()
 
     def phrase3Progress(self) -> float:
-        return self._progress('phrase3')
+        return self.summary.phase3.progress
 
     def isPhrase4Done(self) -> bool:
-        return self._testPhraseDone('phrase4')
+        return self.summary.phase4.testPhraseDone()
 
     def phrase4Duration(self) -> Optional[datetime]:
-        return self._duration('phrase4')
+        return self.summary.phase4.duration()
 
     def phrase4Progress(self) -> float:
-        return self._progress('phrase4')
+        return self.summary.phase4.progress
 
 
 if __name__ == '__main__':
